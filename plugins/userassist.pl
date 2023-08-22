@@ -1,0 +1,165 @@
+#! c:\perl\bin\perl.exe
+#-----------------------------------------------------------
+# userassist.pl
+# Plugin for Registry Ripper, NTUSER.DAT edition - gets the 
+# UserAssist values 
+#
+# Change history
+#  20230710 - added check of NoLog value
+#  20200916 - MITRE updates
+#  20200513 - updated date output format
+#  20170304 - removed alerts, added printing of values with no timestamps in the data
+#  20130603 - added alert functionality
+#  20100322 - Added CLSID list reference
+#  20100308 - created, based on original userassist.pl plugin
+#  
+# References
+#  Control Panel Applets - http://support.microsoft.com/kb/313808
+#  CLSIDs - http://www.autohotkey.com/docs/misc/CLSID-List.htm
+# 
+# copyright 2017 Quantum Analytics Research, LLC
+#-----------------------------------------------------------
+package userassist;
+use strict;
+
+my %config = (hive          => "NTUSER\.DAT",
+              hasShortDescr => 1,
+              hasDescr      => 0,
+              hasRefs       => 0,
+              MITRE         => "T1204",
+              category      => "program execution",
+			  output		=> "report",
+              version       => 20230710);
+
+sub getConfig{return %config}
+sub getShortDescr {
+	return "Displays contents of UserAssist subkeys";	
+}
+sub getDescr{}
+sub getRefs {"Description of Control Panel Files in XP" => "http://support.microsoft.com/kb/313808"}
+sub getHive {return $config{hive};}
+sub getVersion {return $config{version};}
+
+my $VERSION = getVersion();
+
+sub pluginmain {
+	my $class = shift;
+	my $ntuser = shift;
+	::logMsg("Launching userassist v.".$VERSION);
+	my $reg = Parse::Win32Registry->new($ntuser);
+	my $root_key = $reg->get_root_key;
+	
+	my $key_path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist";              
+	my $key;
+	
+	if ($key = $root_key->get_subkey($key_path)) {
+		::rptMsg("UserAssist");
+		::rptMsg($key_path);
+		::rptMsg("LastWrite Time ".::format8601Date($key->get_timestamp())."Z");
+		::rptMsg("");
+#-----------------------------------------------------------------------------		
+# Added 20230710
+# Ref: https://blog.didierstevens.com/programs/userassist/
+		eval {
+			my $n = $key->get_subkey("Settings")->get_value("NoLog")->get_data();
+			if ($n == 1) {
+				::rptMsg("Settings\\NoLog value set to \"1\", disabling creation of new entries on XP.");
+			}
+		};
+		::rptMsg("Settings\\NoLog value not found.") if ($@);
+		::rptMsg("");
+		::rptMsg("Analysis Tip: The \"Settings\\NoLog\" value set to \"1\" disables the creation of new entries on XP.");
+		::rptMsg("");
+		::rptMsg("Ref: https://blog.didierstevens.com/programs/userassist/");
+		::rptMsg("");
+#-----------------------------------------------------------------------------		
+		my @subkeys = $key->get_list_of_subkeys();
+		if (scalar(@subkeys) > 0) {
+			foreach my $s (@subkeys) {
+				::rptMsg($s->get_name());
+				processKey($s);
+				::rptMsg("");
+			}
+		}
+		else {
+			::rptMsg($key_path." has no subkeys.");
+		}
+	}
+	else {
+		::rptMsg($key_path." not found.");
+	}
+}
+
+sub processKey {
+	my $ua = shift;
+	
+	my $key = $ua->get_subkey("Count");
+
+	my %ua = ();
+	my @no_time = ();
+	my $hrzr = "HRZR";
+	
+	my @vals = $key->get_list_of_values();
+	if (scalar(@vals) > 0) {
+		foreach my $v (@vals) {
+			my $value_name = $v->get_name();
+			my $data = $v->get_data();
+
+# Windows XP/2003/Vista/2008
+			if (length($data) == 16) {
+				my ($session,$count,$val1,$val2) = unpack("V*",$data);
+			 	if ($val2 != 0) {
+					my $time_value = ::getTime($val1,$val2);
+					if ($value_name =~ m/^$hrzr/) { 
+						$value_name =~ tr/N-ZA-Mn-za-m/A-Za-z/;
+					}
+					$count -= 5 if ($count > 5);
+					push(@{$ua{$time_value}},$value_name." (".$count.")");
+				}
+				else {
+					push(@no_time,$value_name);
+				}
+			}
+# Windows 7				
+			elsif (length($data) == 72) { 
+				$value_name =~ tr/N-ZA-Mn-za-m/A-Za-z/;
+#				if (unpack("V",substr($data,0,4)) == 0) {	
+#					my $count = unpack("V",substr($data,4,4));
+#					my @t = unpack("VV",substr($data,60,8));
+#					next if ($t[0] == 0 && $t[1] == 0);
+#					my $time_val = ::getTime($t[0],$t[1]);	
+#					print "    .-> ".$time_val."\n";
+#					push(@{$ua{$time_val}},$value_name." (".$count.")");
+#				}
+				my $count = unpack("V",substr($data,4,4));
+				my @t = unpack("VV",substr($data,60,8));
+				if ($t[0] == 0 && $t[1] == 0) {
+					push(@no_time,$value_name);
+				}
+				else {
+#				
+#				print "Value name: ".$value_name."\n";
+#				
+					my $time_val = ::getTime($t[0],$t[1]);
+					push(@{$ua{$time_val}},$value_name." (".$count.")");
+				}
+			}
+			else {
+# Nothing else to do
+			}
+		}
+		foreach my $t (reverse sort {$a <=> $b} keys %ua) {
+			::rptMsg(::format8601Date($t)."Z");
+			foreach my $i (@{$ua{$t}}) {
+				::rptMsg("  ".$i);
+			}
+		}
+		::rptMsg("");
+		::rptMsg("Value names with no time stamps:");
+		foreach my $n (@no_time) {
+			::rptMsg("  ".$n);
+		}
+		
+	}
+}
+1;
