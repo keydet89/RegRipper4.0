@@ -8,6 +8,7 @@
 # Usage: see "_syntax()" function
 #
 # Change History
+#   20250429 - removed reference to defunct function
 #   20230822 - minor tweak in plugin processing
 #   20220714 - added JSON::PP based on input from Mark McKinnon
 #   20210302 - added Digest::MD5
@@ -214,7 +215,6 @@ if ($config{file}) {
 		logMsg($plugins{$i}." complete.");
 		rptMsg("-" x 40);
 	}
-	printAlerts();
 }
 
 #-------------------------------------------------------------
@@ -311,7 +311,6 @@ if ($config{reg} && ($config{auto} || $config{autoTLN})) {
 	}
 }
 
-
 #-------------------------------------------------------------
 # 
 #-------------------------------------------------------------
@@ -371,7 +370,7 @@ Ex: C:\\>rip -r c:\\case\\system -f system
 
 All output goes to STDOUT; use redirection (ie, > or >>) to output to a file\.
   
-copyright 2023 Quantum Analytics Research, LLC
+copyright 2025 Quantum Analytics Research, LLC
 EOT
 }
 
