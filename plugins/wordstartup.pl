@@ -40,7 +40,7 @@ my $office_version;
 sub pluginmain {
 	my $class = shift;
 	my $ntuser = shift;
-	::logMsg("Launching  wordstartup v.".$VERSION);
+	::logMsg("Launching wordstartup v.".$VERSION);
 	::rptMsg("wordstartup v.".$VERSION);
 	::rptMsg("MITRE: ".$config{MITRE}." (".$config{category}.")");
 	::rptMsg("");

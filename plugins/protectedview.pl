@@ -39,7 +39,7 @@ my $office_version;
 sub pluginmain {
 	my $class = shift;
 	my $ntuser = shift;
-	::logMsg("Launching  protectedview v.".$VERSION);
+	::logMsg("Launching protectedview v.".$VERSION);
 	::rptMsg("protectedview v.".$VERSION);
 	::rptMsg("MITRE: ".$config{MITRE}." (".$config{category}.")");
 	::rptMsg("");
