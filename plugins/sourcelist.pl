@@ -37,10 +37,10 @@ sub pluginmain {
 	my $class = shift;
 	my $hive = shift;
 	::rptMsg("Launching sourcelist v.".$VERSION);
-	::rptMsg("sourcelist v.".$VERSION); 
-	::rptMsg("(".$config{hive}.") ".getShortDescr())
+	::rptMsg("sourcelist v.".$VERSION);
+	::rptMsg("(".$config{hive}.") ".getShortDescr());
 	::rptMsg("MITRE: ".$config{MITRE}." (".$config{category}.")");
-	::rptMsg("");;  
+	::rptMsg("");
 
 	my $key_path = ('Software\\Microsoft\\Installer\\Products');
 	
