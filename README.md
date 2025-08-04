@@ -29,3 +29,7 @@ This tool does NOT automatically process hive transaction logs. If you need
 to incorporate data from hive transaction logs into your analysis, consider merging
 the data via Maxim Suhanov's `yarp` + `registryFlush.py`, or via Eric Zimmerman's `rla.exe`
 which is included in [Eric's Registry Explorer/RECmd](https://f001.backblazeb2.com/file/EricZimmermanTools/RegistryExplorer_RECmd.zip).
+
+If you consider incorporating transaction logs, read the 
+article [RegRipper - Handling transaction logs](https://windowsir.blogspot.com/2025/07/regripper.html) about 
+the reasons why RegRipper omits doing it automatically.
