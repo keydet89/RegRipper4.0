@@ -41,7 +41,7 @@ my $office_version;
 sub pluginmain {
 	my $class = shift;
 	my $ntuser = shift;
-	::logMsg("Launching  outlookhomepage v.".$VERSION);
+	::logMsg("Launching outlookhomepage v.".$VERSION);
 	::rptMsg("outlookhomepage v.".$VERSION);
 	::rptMsg("MITRE: ".$config{MITRE}." (".$config{category}.")");
 	::rptMsg("");
