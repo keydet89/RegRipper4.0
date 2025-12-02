@@ -34,6 +34,7 @@
 # copyright 2023 Quantum Analytics Research, LLC
 # Author: H. Carvey, keydet89@yahoo.com
 #-------------------------------------------------------------------------
+# ... (autour de la ligne 40)
 use strict;
 use Parse::Win32Registry qw(:REG_);
 use Getopt::Long;
@@ -42,8 +43,12 @@ use File::Spec;
 use Encode::Unicode;
 use Digest::MD5;
 use JSON::PP;
-require 'time.pl';
-require 'rr_helper.pl';
+use FindBin qw($RealBin);
+use File::Spec;
+
+# absolute path - update saladandonionrings
+require File::Spec->catfile($RealBin,"time.pl");       # Ligne 46
+require File::Spec->catfile($RealBin,"rr_helper.pl");  # Ligne 47
 
 # Included to permit compiling via Perl2Exe
 #perl2exe_include "Parse/Win32Registry.pm";
@@ -75,8 +80,14 @@ $str =~ s/($path[scalar(@path) - 1])//;
 #push(@INC,$str);
 # code updated 20190318
 my $plugindir;
-($^O eq "MSWin32") ? ($plugindir = $str."plugins/")
-                   : ($plugindir = File::Spec->catfile("plugins"));
+# update - saladandonionrings
+use FindBin qw($RealBin);  # find the absolute path
+my $plugindir;
+$plugindir = File::Spec->catfile($RealBin,"plugins");
+# print "Plugins Dir = ".$plugindir."\n";
+# End code update
+my $VERSION = "4.0";
+
 #my $plugindir = $str."plugins/";
 #my $plugindir = File::Spec->catfile("plugins");
 #print "Plugins Dir = ".$plugindir."\n";
