@@ -34,7 +34,6 @@
 # copyright 2023 Quantum Analytics Research, LLC
 # Author: H. Carvey, keydet89@yahoo.com
 #-------------------------------------------------------------------------
-# ... (autour de la ligne 40)
 use strict;
 use Parse::Win32Registry qw(:REG_);
 use Getopt::Long;
