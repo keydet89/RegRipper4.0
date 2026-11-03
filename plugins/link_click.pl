@@ -41,7 +41,7 @@ my $office_version;
 sub pluginmain {
 	my $class = shift;
 	my $ntuser = shift;
-	::logMsg("Launching  link_click v.".$VERSION);
+	::logMsg("Launching link_click v.".$VERSION);
 	::rptMsg("link_click v.".$VERSION);
 	::rptMsg("MITRE: ".$config{MITRE}." (".$config{category}.")");
 	::rptMsg("");

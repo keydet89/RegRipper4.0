@@ -8,6 +8,7 @@
 # Usage: see "_syntax()" function
 #
 # Change History
+#   20250429 - removed reference to defunct function
 #   20230822 - minor tweak in plugin processing
 #   20220714 - added JSON::PP based on input from Mark McKinnon
 #   20210302 - added Digest::MD5
@@ -41,8 +42,12 @@ use File::Spec;
 use Encode::Unicode;
 use Digest::MD5;
 use JSON::PP;
-require 'time.pl';
-require 'rr_helper.pl';
+use FindBin qw($RealBin);
+use File::Spec;
+
+# absolute path - update saladandonionrings
+require File::Spec->catfile($RealBin,"time.pl");       # Ligne 46
+require File::Spec->catfile($RealBin,"rr_helper.pl");  # Ligne 47
 
 # Included to permit compiling via Perl2Exe
 #perl2exe_include "Parse/Win32Registry.pm";
@@ -74,8 +79,14 @@ $str =~ s/($path[scalar(@path) - 1])//;
 #push(@INC,$str);
 # code updated 20190318
 my $plugindir;
-($^O eq "MSWin32") ? ($plugindir = $str."plugins/")
-                   : ($plugindir = File::Spec->catfile("plugins"));
+# update - saladandonionrings
+use FindBin qw($RealBin);  # find the absolute path
+my $plugindir;
+$plugindir = File::Spec->catfile($RealBin,"plugins");
+# print "Plugins Dir = ".$plugindir."\n";
+# End code update
+my $VERSION = "4.0";
+
 #my $plugindir = $str."plugins/";
 #my $plugindir = File::Spec->catfile("plugins");
 #print "Plugins Dir = ".$plugindir."\n";
@@ -214,7 +225,6 @@ if ($config{file}) {
 		logMsg($plugins{$i}." complete.");
 		rptMsg("-" x 40);
 	}
-	printAlerts();
 }
 
 #-------------------------------------------------------------
@@ -311,7 +321,6 @@ if ($config{reg} && ($config{auto} || $config{autoTLN})) {
 	}
 }
 
-
 #-------------------------------------------------------------
 # 
 #-------------------------------------------------------------
@@ -371,7 +380,7 @@ Ex: C:\\>rip -r c:\\case\\system -f system
 
 All output goes to STDOUT; use redirection (ie, > or >>) to output to a file\.
   
-copyright 2023 Quantum Analytics Research, LLC
+copyright 2025 Quantum Analytics Research, LLC
 EOT
 }
 

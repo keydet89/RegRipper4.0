@@ -57,7 +57,7 @@ my %vba = (1 => "Enable all macros",
 sub pluginmain {
 	my $class = shift;
 	my $ntuser = shift;
-	::logMsg("Launching  msoffice v.".$VERSION);
+	::logMsg("Launching msoffice v.".$VERSION);
 	my $reg = Parse::Win32Registry->new($ntuser);
 	my $root_key = $reg->get_root_key;
 	

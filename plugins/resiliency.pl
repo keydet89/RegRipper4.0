@@ -46,7 +46,7 @@ my @apps = ("Word","Excel","OneNote","OutLook");
 sub pluginmain {
 	my $class = shift;
 	my $ntuser = shift;
-	::logMsg("Launching  resiliency v.".$VERSION);
+	::logMsg("Launching resiliency v.".$VERSION);
 	::rptMsg("resiliency v.".$VERSION);
 	::rptMsg("MITRE: ".$config{MITRE}." (".$config{category}.")");
 	::rptMsg("");
