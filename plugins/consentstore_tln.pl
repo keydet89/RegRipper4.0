@@ -2,6 +2,8 @@
 # consentstore_tln
 #
 # Change history:
+#  20261017 - skip time stamps of 0 (no more 1970 events), added LastSetTime
+#             (S. Adkesar)
 #  20200904 - MITRE updates
 #  20200608 - created
 # 
@@ -22,7 +24,7 @@ my %config = (hive          => "Software, NTUSER\.DAT",
               hasRefs       => 0,
 			  output 		=> "tln",
               MITRE         => "T1125 & T1123",
-              version       => 20200904);
+              version       => 20261017);
 
 sub getConfig{return %config}
 sub getShortDescr {
@@ -96,15 +98,27 @@ sub processKey {
 		my $s = $key->get_value("LastUsedTimeStart")->get_data();
 		my ($t0,$t1) = unpack("VV",$s);
 		$start = ::getTime($t0,$t1);
-		::rptMsg($start."|REG|||ConsentStore ".$device." \"".$name."\" LastUsedTimeStart");
+		::rptMsg($start."|REG|||ConsentStore ".$device." \"".$name."\" LastUsedTimeStart") if ($start > 0);
 	};
 							
 	eval {
 		my $s = $key->get_value("LastUsedTimeStop")->get_data();
 		my ($t0,$t1) = unpack("VV",$s);
 		$stop = ::getTime($t0,$t1);
-		::rptMsg($stop."|REG|||ConsentStore ".$device." \"".$name."\" LastUsedTimeStop");
+		::rptMsg($stop."|REG|||ConsentStore ".$device." \"".$name."\" LastUsedTimeStop") if ($stop > 0);
 	};
+
+	if ($start) {
+		eval {
+			my ($t0,$t1) = unpack("VV",$key->get_value("LastSetTime")->get_data());
+			my $t = ::getTime($t0,$t1);
+			my $v = "";
+			eval {
+				$v = " (".$key->get_value("Value")->get_data().")";
+			};
+			::rptMsg($t."|REG|||ConsentStore ".$device." \"".$name."\" LastSetTime".$v) if ($t > 0);
+		};
+	}
 
 }
 

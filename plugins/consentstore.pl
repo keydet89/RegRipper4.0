@@ -2,6 +2,8 @@
 # consentstore
 #
 # Change history:
+#  20261017 - report entries with a LastUsedTimeStop of 0, and the Value and
+#             LastSetTime values; translate NonPackaged app paths (S. Adkesar)
 #  20200904 - MITRE updates
 #  20200608 - created
 # 
@@ -22,7 +24,7 @@ my %config = (hive          => "Software, NTUSER\.DAT",
               hasRefs       => 0,
 			  output		=> "report",
               MITRE         => "T1123 & T1125",
-              version       => 20200904);
+              version       => 20261017);
 
 sub getConfig{return %config}
 sub getShortDescr {
@@ -38,7 +40,7 @@ my $VERSION = getVersion();
 sub pluginmain {
 	my $class = shift;
 	my $hive = shift;
-	::rptMsg("Launching consentstore v.".$VERSION);
+	::logMsg("Launching consentstore v.".$VERSION);
 	::rptMsg("consentstore v.".$VERSION); 
 	::rptMsg("(".$config{hive}.") ".getShortDescr()); 
 	::rptMsg("MITRE: ".$config{MITRE}." (".$config{category}.")");
@@ -89,6 +91,7 @@ sub processKey {
 	my $key = shift;
 	my $device = shift;
 	my $name = $key->get_name();
+	$name =~ s/#/\\/g;
 	
 	my $start = ();
 	my $stop  = ();
@@ -106,12 +109,29 @@ sub processKey {
 	};
 	
 	
-	if ($start && $stop) {
+# a LastUsedTimeStop of 0 means the app was using the device when the hive was
+# collected, or no stop time was recorded
+	if ($start) {
 		::rptMsg($device);
 		::rptMsg($name);
 		::rptMsg(sprintf "%-20s %-20s","LastWrite time",::format8601Date($key->get_timestamp())."Z");
 		::rptMsg(sprintf "%-20s %-20s","LastUsedTimeStart",::format8601Date($start)."Z");
-		::rptMsg(sprintf "%-20s %-20s","LastUsedTimeStop",::format8601Date($stop)."Z");
+		if ($stop) {
+			::rptMsg(sprintf "%-20s %-20s","LastUsedTimeStop",::format8601Date($stop)."Z");
+		}
+		else {
+			::rptMsg(sprintf "%-20s %-20s","LastUsedTimeStop","0 (in use, or not recorded)");
+		}
+
+		eval {
+			::rptMsg(sprintf "%-20s %-20s","Value",$key->get_value("Value")->get_data());
+		};
+
+		eval {
+			my ($t0,$t1) = unpack("VV",$key->get_value("LastSetTime")->get_data());
+			my $t = ::getTime($t0,$t1);
+			::rptMsg(sprintf "%-20s %-20s","LastSetTime",::format8601Date($t)."Z") if ($t > 0);
+		};
 		::rptMsg("");
 	}
 }
